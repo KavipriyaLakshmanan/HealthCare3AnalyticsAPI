@@ -7,6 +7,8 @@ const cookieParser = require("cookie-parser")
 
 const User = require("./UserSchema")
 
+
+// Connecting to MongoDB
 mongoose.connect('mongodb://localhost:27017/local')
     .then(() => {
         console.log('Mongoose Connected successfully');
@@ -35,8 +37,10 @@ app.use((err, req, res, next) => {
     next();
 });
 
+// Destructuring functions from the 'jsonwebtoken' module
 const { sign, verify } = require('jsonwebtoken')
 
+// Function to create a JWT token for a user
 const createToken = (user) => {
 
     const accessToken = sign(
@@ -48,6 +52,8 @@ const createToken = (user) => {
     return accessToken
 }
 
+
+// Middleware to validate JWT token
 const validateToken = (req, res, next) => {
     const accessToken = req.cookies['access-token']
     if (!accessToken) return res.json("user not authenticated")
@@ -61,7 +67,7 @@ const validateToken = (req, res, next) => {
         res.json(err)
     }
 }
-
+// Route to handle user registration
 app.post("/register", async (req, res) => {
     const { username, password } = req.body
     await bcrypt.hash(password, 10).then((hash) => {
@@ -75,6 +81,8 @@ app.post("/register", async (req, res) => {
         res.json(err)
     })
 })
+
+// Route to handle user login
 app.post("/login", async (req, res, next) => {
     const { username, password } = req.body;
 
@@ -106,7 +114,7 @@ app.post("/login", async (req, res, next) => {
     }
 });
 
-
+// Route to handle user logout
 app.post("/logout", validateToken, (req, res) => {
     res.clearCookie("access-token");
     res.json({ success: true, message: "User logged out successfully" });
